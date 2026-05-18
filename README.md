@@ -41,7 +41,7 @@ cd speco-drv-extractor
 
 # Install ffmpeg (if not already present)
 # macOS
-brew install ffmpeg
+brew install ffmpeg-full
 
 # Ubuntu/Debian
 sudo apt-get install ffmpeg
