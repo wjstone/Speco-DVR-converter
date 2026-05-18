@@ -742,6 +742,14 @@ def process_file(drv_path, args, start_dt, font_file, have_drawtext):
             pcm = decoder(audio_bytes)
             write_pcm_wav(pcm, out_path)
             print(f"  audition: {out_path}")
+        # Clean up temp files before returning
+        for tmp_file in [h264_path, wav_path]:
+            if tmp_file and os.path.exists(tmp_file):
+                try:
+                    os.remove(tmp_file)
+                    print(f"Cleaned up {tmp_file}")
+                except OSError as e:
+                    print(f"Warning: could not delete {tmp_file}: {e}")
         return len(audio_bytes) / AUDIO_RATE
 
     chosen_wav = None
@@ -774,6 +782,14 @@ def process_file(drv_path, args, start_dt, font_file, have_drawtext):
     fps_str = f"{fps_value:.6f}"
 
     if args.no_mp4:
+        # Clean up temp files before returning
+        for tmp_file in [h264_path, wav_path]:
+            if tmp_file and os.path.exists(tmp_file):
+                try:
+                    os.remove(tmp_file)
+                    print(f"Cleaned up {tmp_file}")
+                except OSError as e:
+                    print(f"Warning: could not delete {tmp_file}: {e}")
         return audio_seconds
 
     # ---------- Build ffmpeg command ----------
@@ -1058,6 +1074,15 @@ def process_file(drv_path, args, start_dt, font_file, have_drawtext):
                 print(f"  Hardcoded timestamps into {mp4_path}")
             else:
                 print(f"  Burn-in failed; keeping sidecar .srt only.")
+
+    # Clean up temporary .h264 and .wav files
+    for tmp_file in [h264_path, wav_path]:
+        if tmp_file and os.path.exists(tmp_file):
+            try:
+                os.remove(tmp_file)
+                print(f"Cleaned up {tmp_file}")
+            except OSError as e:
+                print(f"Warning: could not delete {tmp_file}: {e}")
 
     return actual_duration
 
