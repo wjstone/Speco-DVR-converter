@@ -51,8 +51,8 @@ if [ ! -f "drv_gui.py" ]; then
     echo "❌ drv_gui.py not found"
     exit 1
 fi
-if [ ! -f "drv_extract_v7.py" ]; then
-    echo "❌ drv_extract_v7.py not found"
+if [ ! -f "drv_extract_v11.py" ]; then
+    echo "❌ drv_extract_v11.py not found"
     exit 1
 fi
 if [ ! -f "drv_extractor.spec" ]; then

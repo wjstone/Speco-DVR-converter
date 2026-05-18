@@ -49,8 +49,8 @@ if not exist "drv_gui.py" (
     echo Error: drv_gui.py not found
     exit /b 1
 )
-if not exist "drv_extract_v7.py" (
-    echo Error: drv_extract_v7.py not found
+if not exist "drv_extract_v11.py" (
+    echo Error: drv_extract_v11.py not found
     exit /b 1
 )
 if not exist "drv_extractor_windows.spec" (

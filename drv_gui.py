@@ -19,23 +19,23 @@ import traceback
 # ============================================================
 
 def find_script():
-    """Find drv_extract_v7.py in current dir, script dir, or bundled resources."""
+    """Find drv_extract_v11.py in current dir, script dir, or bundled resources."""
     candidates = []
     
     # If running as a PyInstaller bundle
     if getattr(sys, 'frozen', False):
         # Running in a bundle
         bundle_dir = sys._MEIPASS
-        candidates.append(os.path.join(bundle_dir, "drv_extract_v7.py"))
+        candidates.append(os.path.join(bundle_dir, "drv_extract_v11.py"))
     
     # Current working directory
-    candidates.append(os.path.join(os.getcwd(), "drv_extract_v7.py"))
+    candidates.append(os.path.join(os.getcwd(), "drv_extract_v11.py"))
     
     # Script directory
-    candidates.append(os.path.join(os.path.dirname(__file__), "drv_extract_v7.py"))
+    candidates.append(os.path.join(os.path.dirname(__file__), "drv_extract_v11.py"))
     
     # App bundle resources (for .app structure)
-    candidates.append(os.path.join(os.path.dirname(__file__), "..", "Resources", "drv_extract_v7.py"))
+    candidates.append(os.path.join(os.path.dirname(__file__), "..", "Resources", "drv_extract_v11.py"))
     
     for path in candidates:
         if os.path.exists(path):
@@ -43,7 +43,23 @@ def find_script():
     
     return None
 
+def find_python():
+    """Find the correct Python executable for subprocesses."""
+    # If not frozen, use current Python
+    if not getattr(sys, 'frozen', False):
+        return sys.executable
+    
+    # Try to find python3 in common locations
+    import shutil
+    python = shutil.which('python3')
+    if python:
+        return python
+    
+    # Fallback to sys.executable
+    return sys.executable
+
 SCRIPT_PATH = find_script()
+PYTHON_PATH = find_python()
 
 # Log startup info to a file for debugging
 LOG_FILE = os.path.expanduser("~/Desktop/drv_extractor.log")
@@ -187,10 +203,10 @@ class DrvGUI:
         if not SCRIPT_PATH or not os.path.exists(SCRIPT_PATH):
             messagebox.showerror(
                 "Error", 
-                "Cannot find drv_extract_v7.py\n\n"
+                "Cannot find drv_extract_v11.py\n\n"
                 "Make sure both files are in the same folder:\n"
                 "  • drv_gui.py\n"
-                "  • drv_extract_v7.py"
+                "  • drv_extract_v11.py"
             )
             return
         
@@ -218,8 +234,8 @@ class DrvGUI:
     def _run_extraction(self, drv_files):
         """Execute the extraction script for each file."""
         try:
-            # Build command
-            cmd = [sys.executable, SCRIPT_PATH]
+            # Build command — use unbuffered Python output for real-time streaming
+            cmd = [PYTHON_PATH, "-u", SCRIPT_PATH]
             
             # Add files
             cmd.extend(str(f) for f in sorted(drv_files))
@@ -245,13 +261,14 @@ class DrvGUI:
             # Log the command
             self._log(f"Command: {' '.join(cmd)}\n")
             
-            # Run process
+            # Run process — ensure it's not running in the context of the GUI app
             self.process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                cwd=self.input_folder
+                cwd=self.input_folder,
+                env={**os.environ, "PYTHONUNBUFFERED": "1"}
             )
             
             # Stream output
